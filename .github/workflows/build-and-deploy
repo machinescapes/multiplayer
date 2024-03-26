@@ -1,4 +1,4 @@
-name: Unity WebGL/GHP Build 
+name: Unity WebGL Build/Deploy
 
 on:
   push:
