@@ -1,4 +1,4 @@
-name: Your GitHub Action Name
+name: Unity WebGL Build
 
 on:
   push:
