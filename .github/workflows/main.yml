@@ -16,7 +16,7 @@ jobs:
       - name: Set up Unity
         uses: game-ci/setup-unity@v1
         with:
-          unityVersion: 2020.3
+          unityVersion: 2023.2.12f1
           components: Unity.WebGL
 
       - name: Build Unity project
