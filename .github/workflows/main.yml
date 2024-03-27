@@ -1,4 +1,4 @@
-name: Unity WebGL Build
+name: TEST GH PAGES
 
 on:
   push:
