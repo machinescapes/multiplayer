@@ -5,16 +5,10 @@ using Photon.Pun;
 using TMPro;
 using UnityEngine.UI;
 using Photon.Pun.UtilityScripts;
-using Unity.VisualScripting;
-
-
 
 public class Weapon : MonoBehaviour
 {
-
     public Image ammoCircle;
-
-
 
     public int damage;
 
@@ -27,7 +21,7 @@ public class Weapon : MonoBehaviour
     [Header("Projecttile wepon setings")]
     public bool isProjectileWeapon = false;
     public GameObject projectile;
-    public  Transform projectileExit;
+    public Transform projectileExit;
     private float nextFire;
 
     [Header("VFX")]
@@ -42,11 +36,9 @@ public class Weapon : MonoBehaviour
     public int shootSFXIndex = 0;
     public PlayerPhotonsoundmanger playerPhotonsoundmanger;
 
-
     [Header("UI")]
     public TextMeshProUGUI magText;
     public TextMeshProUGUI ammoText;
-
 
     [Header("Animation")]
     public Animation animation;
@@ -54,15 +46,12 @@ public class Weapon : MonoBehaviour
 
     [Header("Recol seting")]
     //[Range(0, 1)]
-   // public float recoilPersent = 0.3f;
+    // public float recoilPersent = 0.3f;
     [Range(0, 2)]
     public float recoverPerscent = 0.7f;
     [Space]
     public float recoilUp = 1f;
-     public float recoilBack = 0f;
-
-
-
+    public float recoilBack = 0f;
 
     private Vector3 originalPostion;
     private Vector3 recoilVelocity = Vector3.zero;
@@ -81,7 +70,7 @@ public class Weapon : MonoBehaviour
 
 
 
-    
+
 
     public void Start()
     {
@@ -90,7 +79,7 @@ public class Weapon : MonoBehaviour
         SetAmmo();
 
         originalPostion = transform.localPosition;
-        
+
         recoilLength = 0;
         recoverLength = 1 / fireRate * recoverPerscent;
     }
@@ -107,10 +96,10 @@ public class Weapon : MonoBehaviour
 
 
         if (Input.GetButton("Fire1") && nextFire <= 0 && ammo > 0 && animation.isPlaying == false)
-        
+
         {
             nextFire = 1 / fireRate;
-            ammo--; 
+            ammo--;
 
             magText.text = mag.ToString();
             ammoText.text = ammo + " / " + magAmmo;
@@ -126,10 +115,10 @@ public class Weapon : MonoBehaviour
                 Fire();
             }
 
-            
+
         }
 
-        if (Input.GetKeyDown(KeyCode.R) &&  mag > 0)
+        if (Input.GetKeyDown(KeyCode.R) && mag > 0)
         {
             Reload();
         }
@@ -146,24 +135,24 @@ public class Weapon : MonoBehaviour
 
     }
 
-    
-    
+
+
 
     void ProjectileFire()
     {
-        GameObject myprojecttile =PhotonNetwork.Instantiate(projectile.name, projectileExit.position, projectileExit.rotation);
+        GameObject myprojecttile = PhotonNetwork.Instantiate(projectile.name, projectileExit.position, projectileExit.rotation);
         myprojecttile.GetComponent<Explosive>().isLocalExplosive = true;
         playerPhotonsoundmanger.PlayerShootSFX(shootSFXIndex);
     }
 
     void Reload()
     {
-        animation.Play(reload.name);    
+        animation.Play(reload.name);
 
-        if(mag > 0)
+        if (mag > 0)
         {
-           
-            if (mag > 0) 
+
+            if (mag > 0)
             {
 
                 mag--;
@@ -216,15 +205,15 @@ public class Weapon : MonoBehaviour
         //PhotonNetwork.LocalPlayer.AddScore(1);
 
 
-        
 
-        
+
+
     }
 
 
     void Recoil()
     {
-        Vector3 finalPosition = new Vector3(originalPostion.x, y:originalPostion.y + recoilUp, z:originalPostion.z - recoilBack);
+        Vector3 finalPosition = new Vector3(originalPostion.x, y: originalPostion.y + recoilUp, z: originalPostion.z - recoilBack);
 
         transform.localPosition = Vector3.SmoothDamp(transform.localPosition, finalPosition, ref recoilVelocity, recoilLength);
 
