@@ -1,0 +1,74 @@
+{
+    "name": "xbox support",
+    "maps": [
+        {
+            "name": "gameplay",
+            "id": "f36d5305-6f37-4add-9940-81b681a66665",
+            "actions": [
+                {
+                    "name": "jump",
+                    "type": "Button",
+                    "id": "4e668ee0-5024-4cbe-9fc9-d289eabb1327",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "cam",
+                    "type": "Button",
+                    "id": "40dc743b-844f-43ab-80a6-3c4d7133589a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Move",
+                    "type": "Button",
+                    "id": "2a2f67f7-c76f-494b-a80a-a50875f92a72",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "563e2f5d-c3b9-4c74-b583-839969c0f521",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "17b810db-6079-494e-9cbe-7ffe948fed7f",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "cam",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "05e5a427-5196-4270-ae42-d3850cdadb11",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

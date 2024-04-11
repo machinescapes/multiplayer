@@ -8,7 +8,7 @@ public class MouseLook : MonoBehaviour
     public Vector2 clampInDegrees = new Vector2(360, 180);
     public bool lockCursor = true;
     [Space]
-    private Vector2 sensitivity = new Vector2(2, 2);
+    public Vector2 sensitivity = new Vector2(2, 2);
     [Space]
     public Vector2 smoothing = new Vector2(3, 3);
 
@@ -26,6 +26,10 @@ public class MouseLook : MonoBehaviour
     [HideInInspector]
     public bool scoped;
 
+    private Vector2 smoothedVelocity;
+    private Vector2 currentLookingPos;
+
+
     void Start()
     {
         instance = this;
@@ -36,7 +40,7 @@ public class MouseLook : MonoBehaviour
         // Set target direction for the character body to its inital state.
         if (characterBody)
             targetCharacterDirection = characterBody.transform.localRotation.eulerAngles;
-        
+
         if (lockCursor)
             LockCursor();
 
@@ -58,14 +62,23 @@ public class MouseLook : MonoBehaviour
         // Get raw mouse input for a cleaner reading on more sensitive mice.
         mouseDelta = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
 
-        // Scale input against the sensitivity setting and multiply that against the smoothing value.
+        // Scale mouse input against the sensitivity setting and multiply that against the smoothing value.
         mouseDelta = Vector2.Scale(mouseDelta, new Vector2(sensitivity.x * smoothing.x, sensitivity.y * smoothing.y));
 
-        // Interpolate mouse movement over time to apply smoothing delta.
-        _smoothMouse.x = Mathf.Lerp(_smoothMouse.x, mouseDelta.x, 1f / smoothing.x);
-        _smoothMouse.y = Mathf.Lerp(_smoothMouse.y, mouseDelta.y, 1f / smoothing.y);
+        // Get controller input for a cleaner reading on more sensitive sticks.
+        Vector2 controllerDelta = new Vector2(Input.GetAxis("RightStickHorizontal"), Input.GetAxis("RightStickVertical"));
 
-        // Find the absolute mouse movement value from point zero.
+        // Scale controller input against the sensitivity setting and smoothing value.
+        controllerDelta = Vector2.Scale(controllerDelta, new Vector2(sensitivity.x * smoothing.x, sensitivity.y * smoothing.y));
+
+        // Choose input method: Use controller input if it's being used (i.e., its magnitude is not negligible), otherwise use mouse.
+        Vector2 inputDelta = controllerDelta.sqrMagnitude > 0.01f ? controllerDelta : mouseDelta;
+
+        // Interpolate input movement over time to apply smoothing delta, replacing mouseDelta with inputDelta in the logic.
+        _smoothMouse.x = Mathf.Lerp(_smoothMouse.x, inputDelta.x, 1f / smoothing.x);
+        _smoothMouse.y = Mathf.Lerp(_smoothMouse.y, inputDelta.y, 1f / smoothing.y);
+
+        // Find the absolute input movement value from point zero, replacing previous _mouseAbsolute updates with _smoothMouse.
         _mouseAbsolute += _smoothMouse;
 
         // Clamp and apply the local x value first, so as not to be affected by world transforms.
@@ -90,4 +103,5 @@ public class MouseLook : MonoBehaviour
             transform.localRotation *= yRotation;
         }
     }
+
 }

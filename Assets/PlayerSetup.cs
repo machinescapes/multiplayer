@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using TMPro;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
+using UnityEngine.InputSystem;
 public class PlayerSetup : MonoBehaviour
 {
    public Movement movement;
