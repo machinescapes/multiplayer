@@ -9,81 +9,49 @@ using Photon.Pun.UtilityScripts;
 public class Weapon : MonoBehaviour
 {
     public Image ammoCircle;
-
     public int damage;
-
     public int pelletsCount = 1;
     public float sprayMultiplier = 0f;
-
     public float fireRate;
     public Camera camera;
-
-    [Header("Projecttile wepon setings")]
     public bool isProjectileWeapon = false;
     public GameObject projectile;
     public Transform projectileExit;
     private float nextFire;
-
-    [Header("VFX")]
     public GameObject hitVFX;
-
-    [Header("ammo")]
     public int mag = 5;
     public int ammo = 30;
     public int magAmmo = 30;
-
-    [Header("SFX")]
     public int shootSFXIndex = 0;
     public PlayerPhotonsoundmanger playerPhotonsoundmanger;
-
-    [Header("UI")]
     public TextMeshProUGUI magText;
     public TextMeshProUGUI ammoText;
-
-    [Header("Animation")]
     public Animation animation;
     public AnimationClip reload;
-
-    [Header("Recol seting")]
-    //[Range(0, 1)]
-    // public float recoilPersent = 0.3f;
-    [Range(0, 2)]
     public float recoverPerscent = 0.7f;
-    [Space]
     public float recoilUp = 1f;
     public float recoilBack = 0f;
-
     private Vector3 originalPostion;
     private Vector3 recoilVelocity = Vector3.zero;
-
     private float recoilLength;
     private float recoverLength;
-
-
     private bool recoiling = false;
     public bool recovering;
+
+    void Start()
+    {
+        magText.text = mag.ToString();
+        ammoText.text = ammo + " / " + magAmmo;
+        SetAmmo();
+        originalPostion = transform.localPosition;
+        recoilLength = 0;
+        recoverLength = 1 / fireRate * recoverPerscent;
+    }
 
     void SetAmmo()
     {
         ammoCircle.fillAmount = (float)ammo / magAmmo;
     }
-
-
-
-
-
-    public void Start()
-    {
-        magText.text = mag.ToString();
-        ammoText.text = ammo + " / " + magAmmo;
-        SetAmmo();
-
-        originalPostion = transform.localPosition;
-
-        recoilLength = 0;
-        recoverLength = 1 / fireRate * recoverPerscent;
-    }
-
 
     void Update()
     {
@@ -92,132 +60,90 @@ public class Weapon : MonoBehaviour
             nextFire -= Time.deltaTime;
         }
 
-        // Check for shooting using both the right trigger and the mouse button
-        // You might need to adjust the axis check based on your Input settings if using different controller types
-        bool triggerPressed = Input.GetAxis("Fire1") > 0.5f; // Right trigger on controller
-        bool mousePressed = Input.GetButton("Fire1"); // Left mouse button
-        if ((triggerPressed || mousePressed) && nextFire <= 0 && ammo > 0 && animation.isPlaying == false)
-        {
-            nextFire = 1 / fireRate;
-            ammo--;
-            magText.text = mag.ToString();
-            ammoText.text = ammo + " / " + magAmmo;
-            SetAmmo();
+        float triggerValue = Input.GetAxis("FireTrigger");
+        bool mousePressed = Input.GetButton("Fire1") || triggerValue > 0.1f; // Adjust trigger sensitivity here
 
-            if (isProjectileWeapon)
-            {
-                ProjectileFire();
-            }
-            else
-            {
-                Fire();
-            }
+        if (mousePressed && nextFire <= 0 && ammo > 0 && !animation.isPlaying)
+        {
+            Fire();
         }
 
-        // Check for reloading using both the X button on a controller and the 'R' key on a keyboard
         bool keyReload = Input.GetKeyDown(KeyCode.R);
         bool joystickReload = Input.GetKeyDown(KeyCode.JoystickButton2); // 'X' button on an Xbox controller
-        if ((keyReload || joystickReload) && mag > 0)
+        if ((keyReload || joystickReload) && mag > 0 && ammo < magAmmo)
         {
             Reload();
         }
 
-        // Handle recoil effects
         if (recoiling)
         {
             Recoil();
         }
 
-        // Handle recovery from recoil
         if (recovering)
         {
             Recovering();
         }
     }
 
-
-
-
-
-    void ProjectileFire()
+    void Fire()
     {
-        GameObject myprojecttile = PhotonNetwork.Instantiate(projectile.name, projectileExit.position, projectileExit.rotation);
-        myprojecttile.GetComponent<Explosive>().isLocalExplosive = true;
-        playerPhotonsoundmanger.PlayerShootSFX(shootSFXIndex);
-    }
-
-    void Reload()
-    {
-        animation.Play(reload.name);
-
-        if (mag > 0)
-        {
-
-            if (mag > 0)
-            {
-
-                mag--;
-
-                ammo = magAmmo;
-            }
-        }
+        nextFire = 1 / fireRate;
+        ammo--;
         magText.text = mag.ToString();
         ammoText.text = ammo + " / " + magAmmo;
         SetAmmo();
-
-    }
-
-    void Fire()
-    {
-
         recoiling = true;
         recovering = false;
         playerPhotonsoundmanger.PlayerShootSFX(shootSFXIndex);
+
+        if (isProjectileWeapon)
+        {
+            ProjectileFire();
+        }
+        else
+        {
+            BulletFire();
+        }
+    }
+
+    void ProjectileFire()
+    {
+        GameObject myProjectile = PhotonNetwork.Instantiate(projectile.name, projectileExit.position, projectileExit.rotation);
+        myProjectile.GetComponent<Explosive>().isLocalExplosive = true;
+    }
+
+    void BulletFire()
+    {
         for (int i = 0; i < pelletsCount; i++)
         {
-            Vector3 sprayOffsct = Random.insideUnitCircle * sprayMultiplier;
-            sprayOffsct.z = 0;
-
-
-            Ray ray = new Ray(camera.transform.position, camera.transform.forward + sprayOffsct);
-
+            Vector3 sprayOffset = Random.insideUnitCircle * sprayMultiplier;
+            sprayOffset.z = 0; // Ensure the z-component is zero for 2D spray
+            Ray ray = new Ray(camera.transform.position, camera.transform.forward + sprayOffset);
             RaycastHit hit;
 
             if (Physics.Raycast(ray.origin, ray.direction, out hit, 100f))
             {
                 PhotonNetwork.Instantiate(hitVFX.name, hit.point, Quaternion.identity);
-                if (hit.transform.gameObject.GetComponent<Heath>())
-                {
-                    // damgte score PhotonNetwork.LocalPlayer.AddScore(damage);
-
-                    if (damage >= hit.transform.gameObject.GetComponent<Heath>().health)
-                    {
-                        // kill score
-                        RoomManger.instance.kills++;
-                        RoomManger.instance.SetHashes();
-                        PhotonNetwork.LocalPlayer.AddScore(1);
-                    }
-                    hit.transform.gameObject.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.All, damage);
-                }
+                // Additional effects like damage handling can be added here
             }
         }
-
-        // adds score ever time fired
-        //PhotonNetwork.LocalPlayer.AddScore(1);
-
-
-
-
-
     }
 
+    void Reload()
+    {
+        animation.Play(reload.name);
+        mag--;
+        ammo = magAmmo;
+        magText.text = mag.ToString();
+        ammoText.text = ammo + " / " + magAmmo;
+        SetAmmo();
+    }
 
     void Recoil()
     {
-        Vector3 finalPosition = new Vector3(originalPostion.x, y: originalPostion.y + recoilUp, z: originalPostion.z - recoilBack);
-
+        Vector3 finalPosition = new Vector3(originalPostion.x, originalPostion.y + recoilUp, originalPostion.z - recoilBack);
         transform.localPosition = Vector3.SmoothDamp(transform.localPosition, finalPosition, ref recoilVelocity, recoilLength);
-
 
         if (transform.localPosition == finalPosition)
         {
@@ -226,13 +152,10 @@ public class Weapon : MonoBehaviour
         }
     }
 
-
     void Recovering()
     {
         Vector3 finalPosition = originalPostion;
-
         transform.localPosition = Vector3.SmoothDamp(transform.localPosition, finalPosition, ref recoilVelocity, recoverLength);
-
 
         if (transform.localPosition == finalPosition)
         {
