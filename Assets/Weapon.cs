@@ -85,7 +85,6 @@ public class Weapon : MonoBehaviour
     }
 
 
-    // Update is called once per frame
     void Update()
     {
         if (nextFire > 0)
@@ -93,17 +92,16 @@ public class Weapon : MonoBehaviour
             nextFire -= Time.deltaTime;
         }
 
-
-
-        if (Input.GetButton("Fire1") && nextFire <= 0 && ammo > 0 && animation.isPlaying == false)
-
+        // Check for shooting using both the right trigger and the mouse button
+        // You might need to adjust the axis check based on your Input settings if using different controller types
+        bool triggerPressed = Input.GetAxis("Fire1") > 0.5f; // Right trigger on controller
+        bool mousePressed = Input.GetButton("Fire1"); // Left mouse button
+        if ((triggerPressed || mousePressed) && nextFire <= 0 && ammo > 0 && animation.isPlaying == false)
         {
             nextFire = 1 / fireRate;
             ammo--;
-
             magText.text = mag.ToString();
             ammoText.text = ammo + " / " + magAmmo;
-
             SetAmmo();
 
             if (isProjectileWeapon)
@@ -114,26 +112,29 @@ public class Weapon : MonoBehaviour
             {
                 Fire();
             }
-
-
         }
 
-        if (Input.GetKeyDown(KeyCode.R) && mag > 0)
+        // Check for reloading using both the X button on a controller and the 'R' key on a keyboard
+        bool keyReload = Input.GetKeyDown(KeyCode.R);
+        bool joystickReload = Input.GetKeyDown(KeyCode.JoystickButton2); // 'X' button on an Xbox controller
+        if ((keyReload || joystickReload) && mag > 0)
         {
             Reload();
         }
 
+        // Handle recoil effects
         if (recoiling)
         {
             Recoil();
         }
 
+        // Handle recovery from recoil
         if (recovering)
         {
             Recovering();
         }
-
     }
+
 
 
 
