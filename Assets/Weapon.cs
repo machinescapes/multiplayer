@@ -124,11 +124,20 @@ public class Weapon : MonoBehaviour
 
             if (Physics.Raycast(ray.origin, ray.direction, out hit, 100f))
             {
+                // Instantiate hit effects
                 PhotonNetwork.Instantiate(hitVFX.name, hit.point, Quaternion.identity);
-                // Additional effects like damage handling can be added here
+
+                // Apply damage to the hit object
+                Heath targetHealth = hit.collider.GetComponent<Heath>();
+                if (targetHealth != null)
+                {
+                    // Assuming the 'Health' component has a method 'TakeDamage'
+                    targetHealth.TakeDamage(damage);
+                }
             }
         }
     }
+
 
     void Reload()
     {
